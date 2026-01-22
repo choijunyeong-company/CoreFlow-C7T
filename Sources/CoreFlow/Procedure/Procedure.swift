@@ -113,8 +113,9 @@ public final class ProcedureStep<RootStep, CurrentStep, Value> {
     public func finalStep(
         _ onStep: @escaping (CurrentStep, Value) -> Void
     ) {
+        let holder = procedure.completionHolder
         procedure.workflowCancellable = stream
-            .map { [holder = procedure.completionHolder] actionable, value in
+            .map { [holder] actionable, value in
                 onStep(actionable, value)
                 holder.onFinish?()
                 return ((), ())
