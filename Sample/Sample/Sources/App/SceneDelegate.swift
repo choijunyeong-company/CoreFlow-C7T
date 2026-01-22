@@ -31,6 +31,5 @@ extension SceneDelegate: RootListener {
             .start(rootFlow.core) {
                 print("Procedure finished")
             }
-            .store(in: &store)
     }
 }

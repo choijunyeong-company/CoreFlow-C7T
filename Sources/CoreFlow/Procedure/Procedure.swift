@@ -51,21 +51,32 @@ open class Procedure<RootStep>: @unchecked Sendable {
     /// - Parameters:
     ///   - root: RootStep 프로토콜을 구현한 객체 (일반적으로 Core)
     ///   - onProcedureFinish: 워크플로우 완료 시 호출되는 콜백
-    /// - Returns: 워크플로우 생명주기를 관리하는 `AnyCancellable`
+    /// - Returns: 워크플로우 스트림을 취소할 수 있는 Cancellable
     @discardableResult
     public final func start(
         _ root: RootStep,
         onProcedureFinish onFinish: (() -> Void)? = nil
-    ) -> AnyCancellable {
+    ) -> Self {
         completionHolder.onFinish = onFinish
         stepStreamSubject.send((root, ()))
-        return workflowCancellable
+        return self
+    }
+    
+    public final func cancel() {
+        completionHolder.finish()
     }
 }
 
 extension Procedure {
     final class CompletionHolder {
+        var streamCancellable: AnyCancellable?
         var onFinish: (() -> Void)?
+        
+        func finish() {
+            streamCancellable?.cancel()
+            streamCancellable = nil
+            onFinish?()
+        }
     }
 }
 
@@ -114,11 +125,10 @@ public final class ProcedureStep<RootStep, CurrentStep, Value> {
         _ onStep: @escaping (CurrentStep, Value) -> Void
     ) {
         let holder = procedure.completionHolder
-        procedure.workflowCancellable = stream
+        procedure.completionHolder.streamCancellable = stream
             .map { [holder] actionable, value in
                 onStep(actionable, value)
-                holder.onFinish?()
-                return ((), ())
+                holder.finish()
             }
             .sink(receiveValue: { _ in })
     }
