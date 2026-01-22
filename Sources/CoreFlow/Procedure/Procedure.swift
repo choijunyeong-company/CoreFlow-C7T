@@ -18,7 +18,7 @@ import Combine
 open class Procedure<RootStep>: @unchecked Sendable {
     private let stepStreamSubject = PassthroughSubject<(RootStep, ()), Never>()
     fileprivate var workflowCancellable: AnyCancellable = .init {}
-    fileprivate var onProcedureFinish: (() -> Void)?
+    fileprivate let completionHolder = CompletionHolder()
 
     public init() {}
 
@@ -55,11 +55,17 @@ open class Procedure<RootStep>: @unchecked Sendable {
     @discardableResult
     public final func start(
         _ root: RootStep,
-        onProcedureFinish: (() -> Void)? = nil
+        onProcedureFinish onFinish: (() -> Void)? = nil
     ) -> AnyCancellable {
-        self.onProcedureFinish = onProcedureFinish
+        completionHolder.onFinish = onFinish
         stepStreamSubject.send((root, ()))
         return workflowCancellable
+    }
+}
+
+extension Procedure {
+    final class CompletionHolder {
+        var onFinish: (() -> Void)?
     }
 }
 
@@ -108,9 +114,9 @@ public final class ProcedureStep<RootStep, CurrentStep, Value> {
         _ onStep: @escaping (CurrentStep, Value) -> Void
     ) {
         procedure.workflowCancellable = stream
-            .map { [onFinish = procedure?.onProcedureFinish] actionable, value in
+            .map { [holder = procedure.completionHolder] actionable, value in
                 onStep(actionable, value)
-                onFinish?()
+                holder.onFinish?()
                 return ((), ())
             }
             .sink(receiveValue: { _ in })
