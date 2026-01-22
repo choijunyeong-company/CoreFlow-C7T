@@ -4,6 +4,8 @@
 [![Platforms](https://img.shields.io/badge/Platforms-iOS-yellowgreen?style=flat-square)](https://img.shields.io/badge/Platforms-macOS_iOS_tvOS_watchOS_vision_OS_Linux_Windows_Android-Green?style=flat-square)
 [![Swift Package Manager](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)](https://img.shields.io/badge/Swift_Package_Manager-compatible-orange?style=flat-square)
 
+> **MCP Servers (Context7, etc.)**: For structured documentation guide, see [`llms.txt`](./llms.txt)
+
 # How to use
 
 Xcode 템플릿을 설치하면 CoreFlow 컴포넌트를 빠르게 생성할 수 있습니다.
@@ -76,7 +78,7 @@ CoreFlow는 세 가지 컴포넌트(Flow, Core, Screen)로 구성됩니다.
 이 세 가지 요소로 구성된 집합을 `CoreFlow`라고 명칭합니다.
 
 아래부터 각 구성요소에 대한 간략한 설명이 있습니다.
-해당 레포지토리에 접근하는 MCP 서버의 경우 더 자세한 명세가 적혀있는 [docs](./docs/) 디렉터리 내부 명세 파일을 읽어주세요.
+더 자세한 명세는 [docs](./docs/) 디렉터리 내부 문서를 참고해주세요.
 
 ## Flow
 
@@ -254,69 +256,3 @@ public final class SutCore: Core<SutAction, SutState> {
 
 위 예시에서 `.step1` 액션을 전송하면 Effect 체인을 통해 `.step2` → `.step3` → `.step4`까지 순차적으로 실행됩니다.
 `exhaust()`은 모든 Effect가 완료되어 더 이상 진행 중인 작업이 없을 때 리턴됩니다.
-
----
-
-# MCP Server Documentation Guide
-
-> **For MCP Servers (Context7, etc.)**: This section provides structured documentation paths for AI assistants and MCP servers to effectively navigate and understand the CoreFlow framework.
-
-## Documentation Structure
-
-```
-docs/
-├── core-flow-architecture-guide.md    # Core architecture and components
-├── dependency-injection-guide.md      # DI system with @Autowired
-└── procedure(workflow)-guid.md        # Workflow/Procedure patterns
-```
-
-## Document Index
-
-### 1. Architecture Guide
-- **Path**: `docs/core-flow-architecture-guide.md`
-- **Topic**: CoreFlow Architecture Components
-- **Keywords**: `Flow`, `SLFlow`, `Core`, `SLCore`, `Screen`, `Routing`, `Listener`, `LeakDetector`
-- **Description**: Explains the three core components (Core, Flow, Screen) and their responsibilities. Includes SLFlow/SLCore for screenless features.
-
-### 2. Dependency Injection Guide
-- **Path**: `docs/dependency-injection-guide.md`
-- **Topic**: Dependency Injection System
-- **Keywords**: `ServiceLocator`, `@Autowired`, `Assembly`, `Container`, `Swinject`, `DI`
-- **Description**: Covers the ServiceLocator pattern and @Autowired property wrapper for dependency injection. Includes registration flow and usage examples.
-
-### 3. Procedure (Workflow) Guide
-- **Path**: `docs/procedure(workflow)-guid.md`
-- **Topic**: Workflow/Procedure Patterns
-- **Keywords**: `Procedure`, `ProcedureStep`, `Step Protocol`, `onStep`, `finalStep`, `Combine`, `Workflow`
-- **Description**: Documents the RIBs-like Workflow feature for defining multi-step execution flows. Includes step chaining, lifecycle management, and Combine-based implementation.
-
-## Quick Reference for MCP Servers
-
-| Query Topic | Recommended Document |
-|-------------|---------------------|
-| Component structure (Flow, Core, Screen) | `docs/core-flow-architecture-guide.md` |
-| Navigation / Routing | `docs/core-flow-architecture-guide.md` |
-| Dependency injection / @Autowired | `docs/dependency-injection-guide.md` |
-| ServiceLocator / Assembly | `docs/dependency-injection-guide.md` |
-| Workflow / Procedure | `docs/procedure(workflow)-guid.md` |
-| Step chaining / onStep | `docs/procedure(workflow)-guid.md` |
-| Screenless features (SLCore, SLFlow) | `docs/core-flow-architecture-guide.md` |
-| Testing (exhaust, enableTestMode) | `README.md` (Testing section) |
-
-## Source Code References
-
-| Component | Framework Source | Sample Implementation |
-|-----------|-----------------|----------------------|
-| Flow | `Sources/CoreFlow/Components/Flow.swift` | `Sample/Sample/Sources/Login/LoginFlow.swift` |
-| Core | `Sources/CoreFlow/Components/Core/Core.swift` | `Sample/Sample/Sources/Login/LoginCore.swift` |
-| Screen | `Sources/CoreFlow/Components/Screen.swift` | `Sample/Sample/Sources/Login/LoginScreen.swift` |
-| Procedure | `Sources/CoreFlow/Procedure/Procedure.swift` | `Sample/Sample/Sources/Procedure/DefaultProcedure.swift` |
-| DI | `Sources/CoreFlow/Utils/DI/Autowired.swift` | `Sample/Sample/Sources/Login/LoginProvider.swift` |
-
-## Usage Instructions for MCP Servers
-
-1. **Architecture Questions**: Start with `docs/core-flow-architecture-guide.md` for understanding component relationships
-2. **DI/Injection Questions**: Refer to `docs/dependency-injection-guide.md` for ServiceLocator and @Autowired usage
-3. **Workflow/Flow Questions**: Use `docs/procedure(workflow)-guid.md` for multi-step execution patterns
-4. **Code Examples**: Check the Sample Implementation paths in the Source Code References table
-5. **Testing**: Refer to the Testing section in this README for test mode and exhaust() usage
