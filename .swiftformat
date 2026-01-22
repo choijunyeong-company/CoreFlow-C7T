@@ -1,0 +1,69 @@
+# SwiftFormat configuration for CoreFlow
+# Swift version
+--swiftversion 6.0
+
+# Indentation
+--indent 4
+--smarttabs enabled
+--indentcase false
+--ifdef indent
+
+# Braces (K&R style)
+--allman false
+--elseposition same-line
+--guardelse auto
+
+# Spacing
+--typeblanklines remove
+--emptybraces no-space
+--ranges spaced
+--operatorfunc spaced
+
+# Trailing
+--trailingclosures
+--trailingcommas always
+--trimwhitespace always
+
+# Self
+--self remove
+--selfrequired
+
+# Imports
+--importgrouping alpha
+
+# Wrapping
+--wraparguments before-first
+--wrapcollections before-first
+--closingparen balanced
+--wrapparameters before-first
+
+# Void
+--voidtype Void
+--closurevoid remove
+
+# Miscellaneous
+--semicolons inline-only
+--linebreaks lf
+--maxwidth none
+--patternlet hoist
+--stripunusedargs always
+
+# Disabled rules
+--disable markTypes
+--disable organizeDeclarations
+--disable docComments
+--disable blankLinesBetweenImports
+--disable blankLinesAfterGuardStatements
+--disable wrapConditionalBodies
+--disable wrapMultilineConditionalAssignment
+--disable sortSwitchCases
+--disable acronyms
+--disable isEmpty
+--disable redundantProperty
+--disable propertyTypes
+
+# File header (preserve existing)
+--header ignore
+
+# Exclude paths
+--exclude .build,Packages,tooling
