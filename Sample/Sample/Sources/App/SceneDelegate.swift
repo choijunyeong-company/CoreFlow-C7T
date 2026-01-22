@@ -28,7 +28,9 @@ extension SceneDelegate: RootListener {
         guard let rootFlow else { return }
         
         LaunchProcedure()
-            .start(rootFlow.core)
+            .start(rootFlow.core) {
+                print("Procedure finished")
+            }
             .store(in: &store)
     }
 }
