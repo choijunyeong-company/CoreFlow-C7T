@@ -108,9 +108,9 @@ public final class ProcedureStep<RootStep, CurrentStep, Value> {
         _ onStep: @escaping (CurrentStep, Value) -> Void
     ) {
         procedure.workflowCancellable = stream
-            .map { [weak procedure] actionable, value in
+            .map { [onFinish = procedure?.onProcedureFinish] actionable, value in
                 onStep(actionable, value)
-                procedure?.onProcedureFinish?()
+                onFinish?()
                 return ((), ())
             }
             .sink(receiveValue: { _ in })
