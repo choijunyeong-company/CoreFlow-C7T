@@ -18,7 +18,7 @@ public extension ActionSource {
     private var key: Key { Key(self) }
     
     private var _action: HotSubject {
-        if let obj = objectTable.get(key) {
+        if let obj: HotSubject = objectTable.get(key) {
             return obj
         }
         
@@ -32,8 +32,8 @@ public extension ActionSource {
         return subject
     }
     
-    private static var associateKey: UInt8 = 0
     private func associate(_ target: AnyObject) {
+        var associateKey: UInt8 = 0
         objc_setAssociatedObject(
             self,
             &associateKey,
