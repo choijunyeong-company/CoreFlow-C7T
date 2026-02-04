@@ -2,9 +2,7 @@ import CoreFlow
 import UIKit
 
 public final class LoginScreen: Screen<LoginCore> {
-    private let loginButton = CoreButton {
-        TestView(string: "로그인 실행", size: .init(width: 100, height: 50))
-    }
+    private let loginButton = LoginButton()
     private let loadingIndicator = UIActivityIndicatorView()
 
     /// 상태 관찰과 액션 바인딩을 설정합니다.
@@ -23,7 +21,7 @@ public final class LoginScreen: Screen<LoginCore> {
         }
         
         bind(
-            onEmit: loginButton.onTap,
+            onEmit: loginButton.action,
             send: .loginButtonTapped
         )
     }
