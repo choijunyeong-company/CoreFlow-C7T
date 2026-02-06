@@ -8,12 +8,12 @@ final class LoginScreen: Screen<LoginCore> {
     /// 상태 관찰과 액션 바인딩을 설정합니다.
     override func bind() {
         // Input
-        combineToSingleAction(
-            map(loginSection.action) { .loginSection($0) }
-        )
+        forward(state: \.loginSectionState, to: loginSection)
         
         // Output
-        loginSection.listen(to: reactor.state.map(\.loginSectionState))
+        forward(actions: [
+            map(loginSection.action) { .loginSection($0) }
+        ])
     }
 }
 

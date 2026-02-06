@@ -18,12 +18,12 @@ final class LoginSection: ComponentView {
 
     override func initialize() {
         setupUI()
-        combineToSingleAction(
+        forward(actions: [
             map(loginButton.touchUpInside, to: .loginButtonTapped)
-        )
+        ])
     }
     
-    func listen<P>(to publisher: P) where P : Publisher<State, Never> {
+    func listen<P>(to publisher: P) where P : Publisher, State == P.Output, P.Failure == Never {
         publisher
             .map(\.loginButtonTitleText)
             .sink { [descriptionLabel] text in
