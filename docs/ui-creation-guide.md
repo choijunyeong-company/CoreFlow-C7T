@@ -38,10 +38,72 @@ func update(titleText: String) {
 ## High-level UI 타입(Component)
 
 저수준 UI가 아닌 UI 클래스는 컴포넌트로 분류됩니다.
-컴포넌트 클래스는 `Componentable` 프로토콜을 준수하며, 시각 정보 업데이트를 위한 독자적인 상태를 가집니다.
+컴포넌트 클래스는 `Componentable` 프로토콜을 준수하며, 시각 정보 업데이트를 위한 독자적인 `State` 타입을 가집니다.
+`ComponentView`(`SimpleInitUIView & Componentable`) 타입별칭을 사용하면 편리합니다.
 해당 클래스는 내부적으로 저수준 UI 클래스들을 프로퍼티로 가지고 하위 UI들의 액션을 자신의 액션으로 치환하여 외부로 전달합니다.
 다음과 같은 계층 구조를 가질 수 있습니다.
 
 - Screen > Component > LowLevelView
 - Screen > Component > Component > LowLevelView
 - Screen > LowLevelView
+
+### 컴포넌트 구조
+
+컴포넌트는 내부에 `Action` 열거형과 `State` 구조체를 정의합니다.
+
+```swift
+final class LoginSection: ComponentView {
+    enum Action {
+        case loginButtonTapped
+    }
+
+    struct State: Equatable {
+        var loginButtonTitleText: String = ""
+        var isLoading: Bool = false
+    }
+}
+```
+
+### 상태 수신
+
+컴포넌트는 `listen(to:)` 메서드를 구현하여 외부로부터 상태를 수신합니다.
+
+```swift
+func listen<P>(to publisher: P) where P: Publisher<State, Never> {
+    publisher
+        .map(\.loginButtonTitleText)
+        .sink { [descriptionLabel] text in
+            descriptionLabel.text = text
+        }
+        .store(in: &store)
+}
+```
+
+### 액션 방출
+
+`forwardActions`으로 하위 UI의 이벤트를 컴포넌트 액션으로 변환합니다.
+`initialize()`에서 설정합니다.
+
+```swift
+override func initialize() {
+    forwardActions(
+        map(loginButton.touchUpInside, to: .loginButtonTapped)
+    )
+}
+```
+
+### Screen과 Component 연결
+
+Screen의 `bind()`에서 컴포넌트의 액션을 수신(Input)하고, 상태를 전달(Output)합니다.
+
+```swift
+override func bind() {
+    // Input: 컴포넌트 액션을 Screen 액션으로 변환
+    forwardActions(
+        map(loginSection.action) { .loginSection($0) }
+    )
+
+    // Output: Reactor 상태를 컴포넌트에 전달
+    loginSection.listen(to: reactor.state.map(\.loginSectionState))
+}
+```
