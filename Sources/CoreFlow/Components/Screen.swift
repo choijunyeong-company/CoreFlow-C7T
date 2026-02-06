@@ -143,7 +143,7 @@ public extension Screen {
             .store(in: &store)
     }
     
-    public func forward<Substate, Listener: StateListener>(state keyPath: KeyPath<State, Substate>, to listener: Listener) where Listener.State == Substate {
+    func forward<Substate, Listener: StateListener<Substate>>(state keyPath: KeyPath<State, Substate>, to listener: Listener) {
         listener.listen(to: reactor.state.map(keyPath))
     }
 }

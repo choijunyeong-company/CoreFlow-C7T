@@ -2,7 +2,7 @@ import Combine
 import Foundation
 
 @MainActor
-public protocol ActionSource: AnyObject {
+public protocol ActionSource<Action>: AnyObject {
     associatedtype Action
 
     var action: AnyPublisher<Action, Never> { get }
