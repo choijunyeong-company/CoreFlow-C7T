@@ -1,3 +1,4 @@
 import UIKit
 
-public typealias UIActionView = SimpleInitUIView & ActionSource
+public typealias ActionView = SimpleInitUIView & ActionSource
+public typealias ComponentView = SimpleInitUIView & Componentable

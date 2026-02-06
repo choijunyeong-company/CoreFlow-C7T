@@ -6,8 +6,7 @@ import UIKit
 /// Screen은 Core(Reactor)로부터 상태를 관찰하고, UI 이벤트를 액션으로 변환하여 전송합니다.
 /// `bind()` 메서드에서 상태 관찰과 액션 바인딩을 설정합니다.
 @MainActor
-open class Screen<Reactor: Reactable>: UIViewController, Screenable {
-    public final var store: Set<AnyCancellable> = .init()
+open class Screen<Reactor: Reactable>: UIViewController, Screenable, ActionSource {
     public weak var reactor: Reactor!
 
     public typealias Action = Reactor.Action
