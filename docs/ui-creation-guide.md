@@ -38,8 +38,11 @@ func update(titleText: String) {
 ## High-level UI 타입(Component)
 
 저수준 UI가 아닌 UI 클래스는 컴포넌트로 분류됩니다.
-컴포넌트 클래스는 `Componentable` 프로토콜을 준수하며, 시각 정보 업데이트를 위한 독자적인 `State` 타입을 가집니다.
-`ComponentView`(`SimpleInitUIView & Componentable`) 타입별칭을 사용하면 편리합니다.
+컴포넌트는 `ActionSource`와 `StateListener` 두 프로토콜을 준수합니다.
+- `ActionSource`: 액션을 정의하고 방출합니다.
+- `StateListener`: 독자적인 `State` 타입을 가지며, 상태가 많아 스트림으로 수신합니다.
+
+`ComponentView`(`SimpleInitUIView & ActionSource & StateListener`) 타입별칭을 사용하면 편리합니다.
 해당 클래스는 내부적으로 저수준 UI 클래스들을 프로퍼티로 가지고 하위 UI들의 액션을 자신의 액션으로 치환하여 외부로 전달합니다.
 다음과 같은 계층 구조를 가질 수 있습니다.
 
