@@ -84,29 +84,29 @@ func listen<P>(to publisher: P) where P: Publisher<State, Never> {
 
 ### 액션 방출
 
-`forwardActions`으로 하위 UI의 이벤트를 컴포넌트 액션으로 변환합니다.
+`forward(actions:)`으로 하위 UI의 이벤트를 컴포넌트 액션으로 변환합니다.
 `initialize()`에서 설정합니다.
 
 ```swift
 override func initialize() {
-    forwardActions(
+    forward(actions: [
         map(loginButton.touchUpInside, to: .loginButtonTapped)
-    )
+    ])
 }
 ```
 
 ### Screen과 Component 연결
 
-Screen의 `bind()`에서 컴포넌트의 액션을 수신(Input)하고, 상태를 전달(Output)합니다.
+Screen의 `bind()`에서 컴포넌트의 상태를 전달(Input)하고, 액션을 수신(Output)합니다.
 
 ```swift
 override func bind() {
-    // Input: 컴포넌트 액션을 Screen 액션으로 변환
-    forwardActions(
-        map(loginSection.action) { .loginSection($0) }
-    )
+    // Input: Reactor 상태를 컴포넌트에 전달
+    forward(state: \.loginSectionState, to: loginSection)
 
-    // Output: Reactor 상태를 컴포넌트에 전달
-    loginSection.listen(to: reactor.state.map(\.loginSectionState))
+    // Output: 컴포넌트 액션을 Screen 액션으로 변환
+    forward(actions: [
+        map(loginSection.action) { .loginSection($0) }
+    ])
 }
 ```
