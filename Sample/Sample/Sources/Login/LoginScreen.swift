@@ -21,7 +21,7 @@ public final class LoginScreen: Screen<LoginCore> {
         }
         
         bind(
-            onEmit: loginButton.action,
+            onEmit: loginButton.touchUpInside,
             send: .loginButtonTapped
         )
     }
