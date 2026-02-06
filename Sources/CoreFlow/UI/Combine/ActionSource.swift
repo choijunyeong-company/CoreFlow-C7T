@@ -55,48 +55,4 @@ public extension ActionSource {
     }
 }
 
-private let objectTable = Table()
-
-private final class Table: @unchecked Sendable {
-    typealias Key = ObjectIdentifier
-    private var dictionary: [Key: WeakValue] = [:]
-    private let lock = NSLock()
-    
-    func set(_ key: Key, value: AnyObject) {
-        defer { lock.unlock() }
-        lock.lock()
-        
-        dictionary[key] = WeakValue(object: value)
-    }
-    
-    func get<T: AnyObject>(_ key: Key) -> T? {
-        defer { lock.unlock() }
-        lock.lock()
-        
-        return dictionary[key]?.object as? T
-    }
-    
-    func remove(_ key: Key) {
-        defer { lock.unlock() }
-        lock.lock()
-        
-        dictionary.removeValue(forKey: key)
-    }
-}
-
-private struct WeakValue {
-    weak var object: AnyObject?
-    init(object: AnyObject) {
-        self.object = object
-    }
-}
-
-private final class DeinitDetector {
-    private let onDeinit: () -> Void
-    private let object: AnyObject
-    init(_ object: AnyObject, onDeinit: @escaping () -> Void) {
-        self.object = object
-        self.onDeinit = onDeinit
-    }
-    deinit { onDeinit() }
-}
+private let objectTable = WeakValueTable()
