@@ -9,6 +9,8 @@ public protocol ActionSource: AnyObject {
     var action: AnyPublisher<Action, Failure> { get }
     func send(_ action: Action)
     func send(_ error: Failure)
+    func map<P: Publisher>(_ publisher: P, to: Action) -> AnyPublisher<Action, Failure> where Failure == P.Failure
+    func map<P: Publisher>(_ publisher: P, to: Action, mapError: @escaping (P.Failure) -> Failure) -> AnyPublisher<Action, Failure>
 }
 
 public extension ActionSource {
@@ -52,6 +54,19 @@ public extension ActionSource {
 
     func send(_ error: Failure) {
         _action.send(completion: .failure(error))
+    }
+    
+    func map<P: Publisher>(_ publisher: P, to action: Action) -> AnyPublisher<Action, Failure> where Failure == P.Failure {
+        publisher
+            .map { _ in action }
+            .eraseToAnyPublisher()
+    }
+    
+    func map<P: Publisher>(_ publisher: P, to action: Action, mapError: @escaping (P.Failure) -> Failure) -> AnyPublisher<Action, Failure> {
+        publisher
+            .map { _ in action }
+            .mapError(mapError)
+            .eraseToAnyPublisher()
     }
 }
 
