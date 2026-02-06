@@ -8,6 +8,7 @@
 docs/
 ├── core-flow-architecture-guide.md    # Core architecture and components
 ├── dependency-injection-guide.md      # DI system with @Autowired
+├── ui-creation-guide.md               # UI Creation guide (View tree, Action & State Management)
 └── procedure(workflow)-guid.md        # Workflow/Procedure patterns
 ```
 
