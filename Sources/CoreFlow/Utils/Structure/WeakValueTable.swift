@@ -12,7 +12,7 @@ final class WeakValueTable: @unchecked Sendable {
         dictionary[key] = WeakValue(object: value)
     }
     
-    func get<T: AnyObject>(_ key: Key) -> T? {
+    func get<T>(_ key: Key) -> T? {
         defer { lock.unlock() }
         lock.lock()
         

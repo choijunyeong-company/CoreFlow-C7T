@@ -4,70 +4,99 @@ import Foundation
 @MainActor
 public protocol ActionSource: AnyObject {
     associatedtype Action
-    associatedtype Failure: Error
+
+    var action: AnyPublisher<Action, Never> { get }
     
-    var action: AnyPublisher<Action, Failure> { get }
     func send(_ action: Action)
-    func send(_ error: Failure)
-    func map<P: Publisher>(_ publisher: P, to: Action) -> AnyPublisher<Action, Failure> where Failure == P.Failure
-    func map<P: Publisher>(_ publisher: P, to: Action, mapError: @escaping (P.Failure) -> Failure) -> AnyPublisher<Action, Failure>
+    func map<P: Publisher>(_ publisher: P, to: Action) -> AnyPublisher<Action, Never> where P.Failure == Never
+    func map<P: Publisher>(_ publisher: P, transform: @escaping (P.Output) -> Action) -> AnyPublisher<Action, Never> where P.Failure == Never
+    
+    func combineToSingleAction(_ publishers: AnyPublisher<Action, Never>...)
 }
 
-public extension ActionSource {
-    private typealias HotSubject = PassthroughSubject<Action, Failure>
+extension ActionSource {
+    private typealias HotSubject = PassthroughSubject<Action, Never>
     private typealias Key = ObjectIdentifier
-    
+
     private var key: Key { Key(self) }
-    
-    private var _action: HotSubject {
-        if let obj: HotSubject = objectTable.get(key) {
-            return obj
-        }
-        
-        let refKey = key
-        let subject = HotSubject()
-        let deinitDetactor = DeinitDetector(subject) {
-            objectTable.remove(refKey)
-        }
-        associate(deinitDetactor)
-        objectTable.set(refKey, value: subject)
-        return subject
-    }
-    
-    private func associate(_ target: AnyObject) {
+
+    private func associate(_ target: AnyObject, onDeinit: @escaping () -> Void) {
         var associateKey: UInt8 = 0
         objc_setAssociatedObject(
             self,
             &associateKey,
-            target,
+            DeinitDetector(target, onDeinit: onDeinit),
             .OBJC_ASSOCIATION_RETAIN_NONATOMIC
         )
     }
-    
-    var action: AnyPublisher<Action, Failure> {
+
+    // MARK: Action
+
+    private var _action: HotSubject {
+        if let obj: HotSubject = actionSubjectTable.get(key) {
+            return obj
+        }
+
+        let refKey = key
+        let subject = HotSubject()
+        associate(subject) { actionSubjectTable.remove(refKey) }
+        actionSubjectTable.set(refKey, value: subject)
+        return subject
+    }
+
+    public var action: AnyPublisher<Action, Never> {
         _action.eraseToAnyPublisher()
     }
-    
-    func send(_ action: Action) {
+
+    public func send(_ action: Action) {
         _action.send(action)
     }
 
-    func send(_ error: Failure) {
-        _action.send(completion: .failure(error))
+    // MARK: Store
+
+    public var store: Set<AnyCancellable> {
+        get { _store.object }
+        set { _store.object = newValue }
     }
-    
-    func map<P: Publisher>(_ publisher: P, to action: Action) -> AnyPublisher<Action, Failure> where Failure == P.Failure {
+
+    private var _store: ObjectWrapper<Set<AnyCancellable>> {
+        if let obj: ObjectWrapper<Set<AnyCancellable>> = storeTable.get(key) {
+            return obj
+        }
+
+        let refKey = key
+        let wrappedStore = ObjectWrapper(Set<AnyCancellable>())
+        associate(wrappedStore) { storeTable.remove(refKey) }
+        storeTable.set(refKey, value: wrappedStore)
+        return wrappedStore
+    }
+
+    // MARK: Mapping
+
+    public func map<P: Publisher>(_ publisher: P, to action: Action) -> AnyPublisher<Action, Never> where P.Failure == Never {
         publisher
             .map { _ in action }
             .eraseToAnyPublisher()
     }
-    
-    func map<P: Publisher>(_ publisher: P, to action: Action, mapError: @escaping (P.Failure) -> Failure) -> AnyPublisher<Action, Failure> {
+
+    public func map<P: Publisher>(_ publisher: P, transform: @escaping (P.Output) -> Action) -> AnyPublisher<Action, Never> where P.Failure == Never {
         publisher
-            .map { _ in action }
-            .mapError(mapError)
+            .map { transform($0) }
             .eraseToAnyPublisher()
+    }
+
+    // MARK: Combine
+
+    public func combineToSingleAction(_ publishers: AnyPublisher<Action, Never>...) {
+        Publishers
+            .MergeMany(publishers)
+            .weakRef(self)
+            .sink { source, action in
+                source.send(action)
+            }
+            .store(in: &store)
     }
 }
 
-private let objectTable = WeakValueTable()
+private let actionSubjectTable = WeakValueTable()
+private let storeTable = WeakValueTable()
