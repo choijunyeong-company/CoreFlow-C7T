@@ -1,59 +1,47 @@
 import Combine
 import UIKit
 
-struct UIControlEventPublisher<Control: AnyObject>: Publisher {
-    typealias Output = Void
+struct UIControlEventPublisher<Control: UIControl>: Publisher {
+    typealias Output = Control
     typealias Failure = Never
 
     private let uiControl: Control
-    private let addTarget: (Control, AnyObject, Selector) -> Void
-    private let removeTarget: (Control?, AnyObject, Selector) -> Void
+    private let event: UIControl.Event
 
-    init(
-        uiControl: Control,
-        addTarget: @escaping (Control, AnyObject, Selector) -> Void,
-        removeTarget: @escaping (Control?, AnyObject, Selector) -> Void
-    ) {
+    init(uiControl: Control, event: UIControl.Event) {
         self.uiControl = uiControl
-        self.addTarget = addTarget
-        self.removeTarget = removeTarget
+        self.event = event
     }
 
     func receive<S>(subscriber: S) where S : Subscriber, Failure == S.Failure, Output == S.Input {
         let subscription = UIControlEventSubscription(
             uiControl: uiControl,
-            subscriber: subscriber,
-            addTarget: addTarget,
-            removeTarget: removeTarget
+            event: event,
+            subscriber: subscriber
         )
         subscriber.receive(subscription: subscription)
     }
 }
 
-final class UIControlEventSubscription<S: Subscriber, Control: AnyObject>: Subscription where S.Input == Void {
+final class UIControlEventSubscription<S: Subscriber, Control: UIControl>: Subscription, @unchecked Sendable where S.Input == Control {
     private weak var uiControl: Control?
     private var subscriber: S?
-    private var removeTarget: (Control?, AnyObject, Selector) -> Void
+    private let event: UIControl.Event
 
-    private let action = #selector(handleAction)
+    private let action = #selector(handleAction(_:))
     private var demand: Subscribers.Demand = .none
 
-    init(
-        uiControl: Control,
-        subscriber: S,
-        addTarget: @escaping (Control, AnyObject, Selector) -> Void,
-        removeTarget: @escaping (Control?, AnyObject, Selector) -> Void
-    ) {
+    init(uiControl: Control, event: UIControl.Event, subscriber: S) {
         self.uiControl = uiControl
+        self.event = event
         self.subscriber = subscriber
-        self.removeTarget = removeTarget
 
-        addTarget(uiControl, self, action)
+        uiControl.addTarget(self, action: action, for: event)
     }
 
     func cancel() {
         subscriber = nil
-        removeTarget(uiControl, self, action)
+        uiControl?.removeTarget(self, action: action, for: event)
     }
     
     func request(_ demand: Subscribers.Demand) {
@@ -61,10 +49,16 @@ final class UIControlEventSubscription<S: Subscriber, Control: AnyObject>: Subsc
     }
     
     @objc
-    private func handleAction() {
+    private func handleAction(_ control: UIControl) {
         guard demand > .none else { return }
         
         demand -= .max(1)
-        demand += (subscriber?.receive() ?? .none)
+        
+        guard let typed = control as? Control else {
+            assertionFailure("control type casting failed")
+            return
+        }
+        
+        demand += (subscriber?.receive(typed) ?? .none)
     }
 }
