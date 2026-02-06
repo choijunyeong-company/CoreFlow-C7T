@@ -2,7 +2,7 @@ import Combine
 import UIKit
 
 extension UITapGestureRecognizer {
-    public var tapPublisher: AnyPublisher<UITapGestureRecognizer, Never> {
+    public var gesture: AnyPublisher<UITapGestureRecognizer, Never> {
         GestureRecognizerPublisher(recognizer: self)
             .eraseToAnyPublisher()
     }
