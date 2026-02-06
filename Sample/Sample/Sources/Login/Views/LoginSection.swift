@@ -14,6 +14,7 @@ final class LoginSection: ComponentView {
 
     private let descriptionLabel = UILabel()
     private let loginButton = UIButton()
+    private let loadingIndicator = UIActivityIndicatorView()
 
     override func initialize() {
         setupUI()
@@ -32,8 +33,14 @@ final class LoginSection: ComponentView {
         
         publisher
             .map(\.isLoading)
-            .sink { [loginButton] isLoading in
+            .sink { [loginButton, loadingIndicator] isLoading in
                 loginButton.isUserInteractionEnabled = !isLoading
+                loadingIndicator.isHidden = !isLoading
+                if isLoading {
+                    loadingIndicator.startAnimating()
+                } else {
+                    loadingIndicator.stopAnimating()
+                }
             }
             .store(in: &store)
     }
@@ -43,6 +50,7 @@ extension LoginSection {
     private func setupUI() {
         setupDescriptionLabel()
         setupLoginButton()
+        setupLoadingIndicator()
     }
 
     private func setupDescriptionLabel() {
@@ -72,6 +80,18 @@ extension LoginSection {
             loginButton.topAnchor.constraint(equalTo: descriptionLabel.bottomAnchor, constant: 16),
             loginButton.centerXAnchor.constraint(equalTo: centerXAnchor),
             loginButton.bottomAnchor.constraint(equalTo: bottomAnchor),
+        ])
+    }
+
+    private func setupLoadingIndicator() {
+        loadingIndicator.isHidden = true
+
+        addSubview(loadingIndicator)
+        loadingIndicator.translatesAutoresizingMaskIntoConstraints = false
+
+        NSLayoutConstraint.activate([
+            loadingIndicator.centerXAnchor.constraint(equalTo: loginButton.centerXAnchor),
+            loadingIndicator.centerYAnchor.constraint(equalTo: loginButton.centerYAnchor),
         ])
     }
 }
