@@ -142,4 +142,8 @@ public extension Screen {
             .sink(receiveValue: sink)
             .store(in: &store)
     }
+    
+    public func forward<Substate, Listener: StateListener>(state keyPath: KeyPath<State, Substate>, to listener: Listener) where Listener.State == Substate {
+        listener.listen(to: reactor.state.map(keyPath))
+    }
 }

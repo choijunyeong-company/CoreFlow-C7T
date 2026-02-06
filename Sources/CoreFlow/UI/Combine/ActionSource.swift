@@ -11,7 +11,7 @@ public protocol ActionSource: AnyObject {
     func map<P: Publisher>(_ publisher: P, to: Action) -> AnyPublisher<Action, Never> where P.Failure == Never
     func map<P: Publisher>(_ publisher: P, transform: @escaping (P.Output) -> Action) -> AnyPublisher<Action, Never> where P.Failure == Never
     
-    func combineToSingleAction(_ publishers: AnyPublisher<Action, Never>...)
+    func forward(actions: [AnyPublisher<Action, Never>])
 }
 
 extension ActionSource {
@@ -71,7 +71,17 @@ extension ActionSource {
         return wrappedStore
     }
 
-    // MARK: Mapping
+    // MARK: Forward actions
+    
+    public func forward(actions: [AnyPublisher<Action, Never>]) {
+        Publishers
+            .MergeMany(actions)
+            .weakRef(self)
+            .sink { source, action in
+                source.send(action)
+            }
+            .store(in: &store)
+    }
 
     public func map<P: Publisher>(_ publisher: P, to action: Action) -> AnyPublisher<Action, Never> where P.Failure == Never {
         publisher
@@ -83,18 +93,6 @@ extension ActionSource {
         publisher
             .map { transform($0) }
             .eraseToAnyPublisher()
-    }
-
-    // MARK: Combine
-
-    public func combineToSingleAction(_ publishers: AnyPublisher<Action, Never>...) {
-        Publishers
-            .MergeMany(publishers)
-            .weakRef(self)
-            .sink { source, action in
-                source.send(action)
-            }
-            .store(in: &store)
     }
 }
 
