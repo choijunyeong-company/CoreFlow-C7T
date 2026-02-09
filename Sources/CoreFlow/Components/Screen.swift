@@ -132,9 +132,22 @@ public extension Screen {
     ///
     /// Automatically filters duplicate values for `Equatable` properties.
     /// Useful for preventing unnecessary UI re-renders.
+    final func observeDistinctState<T: Equatable, R: AnyObject>(
+        _ keyPath: KeyPath<State, T>,
+        receiver: R,
+        sink: @escaping (R, T) -> Void
+    ) {
+        reactor.state
+            .map(keyPath)
+            .removeDuplicates()
+            .weakRef(receiver)
+            .sink(receiveValue: sink)
+            .store(in: &store)
+    }
+    
     final func observeDistinctState<T: Equatable>(
         _ keyPath: KeyPath<State, T>,
-        sink: @escaping (_ output: T) -> Void
+        sink: @escaping (T) -> Void
     ) {
         reactor.state
             .map(keyPath)
