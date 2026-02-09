@@ -1,13 +1,13 @@
 import Combine
 import Foundation
 
-/// 단방향 데이터 플로우를 관리하는 비즈니스 로직 컴포넌트입니다.
+/// A business logic component that manages unidirectional data flow.
 ///
-/// Core는 Screen으로부터 Action을 수신하고, 이를 처리하여 State를 변경합니다.
-/// 상태 변경은 `reduce(state:action:)` 메서드에서 이루어지며,
-/// 비동기 작업이 필요한 경우 `Effect`를 반환하여 파생 액션을 생성할 수 있습니다.
+/// Core receives Actions from Screen, processes them, and updates State.
+/// State changes occur in the `reduce(state:action:)` method.
+/// For asynchronous operations, return an `Effect` to generate derived actions.
 ///
-/// - Note: Core는 Flow에 의해 생성되고 관리됩니다.
+/// - Note: Core is created and managed by Flow.
 @MainActor
 open class Core<Action: Sendable, State>: Reactable, Activatable {
     private let initialState: State
@@ -39,30 +39,30 @@ open class Core<Action: Sendable, State>: Reactable, Activatable {
         exhaustionContinuations.values.forEach { $0.resume() }
     }
 
-    /// 액션을 처리하고 상태를 변경하는 메서드입니다.
+    /// Processes an action and updates the state.
     ///
-    /// 서브클래스에서 반드시 오버라이드하여 액션 처리 로직을 구현합니다.
-    /// 상태 변경이 필요한 경우 `state` 파라미터를 직접 수정하고,
-    /// 비동기 작업이 필요한 경우 `Effect.run`을 반환합니다.
+    /// Must be overridden in subclasses to implement action handling logic.
+    /// Mutate the `state` parameter directly for state changes,
+    /// and return `Effect.run` for asynchronous operations.
     ///
     /// - Parameters:
-    ///   - state: 현재 상태에 대한 참조. 직접 수정하여 상태를 변경합니다.
-    ///   - action: 처리할 액션
-    /// - Returns: 추가 작업이 필요한 경우 Effect, 그렇지 않으면 `.none`
+    ///   - state: A reference to the current state. Mutate directly to change state.
+    ///   - action: The action to process.
+    /// - Returns: An `Effect` for additional work, or `.none`.
     open func reduce(state _: inout State, action _: Action) -> Effect<Action> { .none }
 
-    /// Flow가 Core를 생성한 직후 호출됩니다.
+    /// Called immediately after Flow creates the Core.
     open func didBecomeActive() {}
 
-    /// Flow가 해제되기 직전 호출됩니다.
+    /// Called just before Flow is deallocated.
     open func willResignActive() {}
 
-    /// 액션을 Core에 전송합니다.
+    /// Sends an action to the Core.
     ///
-    /// Screen이나 외부에서 이 메서드를 호출하여 액션을 전달합니다.
-    /// 전달된 액션은 `reduce(state:action:)` 메서드에서 처리됩니다.
+    /// Called from Screen or externally to deliver an action.
+    /// The action is processed in `reduce(state:action:)`.
     ///
-    /// - Parameter action: 전송할 액션
+    /// - Parameter action: The action to send.
     public final func send(_ action: Action) {
         ensureStream()
         incrementInFlight(action)
@@ -172,19 +172,19 @@ extension Core {
     }
 }
 
-/// 액션 처리 결과로 반환되는 사이드 이펙트입니다.
+/// A side effect returned from action processing.
 ///
-/// `reduce(state:action:)` 메서드에서 비동기 작업이 필요한 경우 사용합니다.
-/// - `.none`: 추가 작업 없음
-/// - `.run`: 비동기 작업 실행 후 파생 액션 전송
+/// Used when asynchronous work is needed in `reduce(state:action:)`.
+/// - `.none`: No additional work.
+/// - `.run`: Executes async work and sends derived actions.
 public enum Effect<Action: Sendable>: @unchecked Sendable {
     public typealias Send = @MainActor (Action) async -> Void
     public typealias RunTask = @MainActor @Sendable (Send) async -> Void
 
-    /// 추가 작업이 필요 없음
+    /// No additional work needed.
     case none
 
-    /// 비동기 작업을 실행하고, 완료 후 파생 액션을 전송
+    /// Executes async work and sends derived actions upon completion.
     case run(priority: TaskPriority? = nil, task: RunTask)
 }
 

@@ -1,12 +1,12 @@
 import UIKit
 
-/// CoreFlow 계층을 관리하는 코디네이터 컴포넌트입니다.
+/// A coordinator component that manages the CoreFlow hierarchy.
 ///
-/// Flow는 Core와 Screen을 소유하고, 하위 CoreFlow로의 라우팅을 담당합니다.
-/// Routing 프로토콜을 구현하여 화면 전환 로직을 처리합니다.
+/// Flow owns Core and Screen, and handles routing to child CoreFlows.
+/// Implements routing protocols to manage screen transitions.
 ///
-/// - Note: Flow가 해제되면 Core와 Screen도 함께 해제됩니다.
-///         해제 후에도 메모리에 남아있으면 LeakDetector가 감지합니다.
+/// - Note: When Flow is deallocated, Core and Screen are also released.
+///         LeakDetector will detect if they remain in memory after deallocation.
 @MainActor
 open class Flow<Core: Reactable & Activatable, Screen: Screenable>: Flowable {
     public private(set) lazy var core = {
@@ -41,18 +41,18 @@ open class Flow<Core: Reactable & Activatable, Screen: Screenable>: Flowable {
         #endif
     }
 
-    /// Core 인스턴스를 생성합니다.
+    /// Creates a Core instance.
     ///
-    /// 서브클래스에서 반드시 오버라이드하여 Core를 생성하고,
-    /// listener, router 등 필요한 의존성을 설정합니다.
+    /// Must be overridden in subclasses to create the Core
+    /// and configure dependencies such as listener and router.
     open func createCore() -> Core {
         preconditionFailure("you must override this method")
     }
 
-    /// Screen 인스턴스를 생성합니다.
+    /// Creates a Screen instance.
     ///
-    /// 서브클래스에서 반드시 오버라이드하여 Screen을 생성하고,
-    /// `bind()` 메서드를 호출하여 상태 바인딩을 설정합니다.
+    /// Must be overridden in subclasses to create the Screen
+    /// and call `bind()` to configure state binding.
     open func createScreen() -> Screen {
         preconditionFailure("you must override this method")
     }

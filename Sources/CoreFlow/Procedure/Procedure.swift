@@ -1,9 +1,9 @@
 import Combine
 
-/// 여러 CoreFlow를 거치는 워크플로우를 선언적으로 정의하는 클래스입니다.
+/// A class that declaratively defines a workflow spanning multiple CoreFlows.
 ///
-/// `Procedure`를 상속하여 `init()`에서 `onStep`과 `finalStep`을 체이닝하여
-/// 워크플로우를 구성합니다. Core가 Step 프로토콜을 구현하여 각 단계의 동작을 정의합니다.
+/// Subclass `Procedure` and chain `onStep` and `finalStep` in `init()` to
+/// compose the workflow. Core implements Step protocols to define each step's behavior.
 ///
 /// ```swift
 /// final class LaunchProcedure: Procedure<RootProcedureStep> {
@@ -22,15 +22,15 @@ open class Procedure<RootStep>: @unchecked Sendable {
 
     public init() {}
 
-    /// 서브클래스에서 오버라이드하여 워크플로우를 시작합니다.
+    /// Override in subclasses to start the workflow.
     open func start() {
         preconditionFailure("must override this method")
     }
 
-    /// 첫 번째 Step을 정의합니다.
+    /// Defines the first step.
     ///
-    /// - Parameter onStep: RootStep을 받아 다음 Step과 전달 데이터를 포함한 Publisher를 반환하는 클로저
-    /// - Returns: 다음 Step을 체이닝할 수 있는 `ProcedureStep`
+    /// - Parameter onStep: A closure that takes RootStep and returns a Publisher containing the next Step and data.
+    /// - Returns: A `ProcedureStep` that can chain to the next step.
     public final func onStep<NextStep, NextValue>(
         _ onStep: @escaping (RootStep) -> AnyPublisher<(NextStep, NextValue), Never>
     ) -> ProcedureStep<RootStep, NextStep, NextValue> {
@@ -43,15 +43,15 @@ open class Procedure<RootStep>: @unchecked Sendable {
         }
     }
 
-    /// 워크플로우를 실행합니다.
+    /// Executes the workflow.
     ///
-    /// RootStep 프로토콜을 구현한 Core를 전달하여 워크플로우를 시작합니다.
-    /// 반환된 `AnyCancellable`을 저장하여 워크플로우 생명주기를 관리합니다.
+    /// Pass a Core that implements the RootStep protocol to start the workflow.
+    /// Store the returned `AnyCancellable` to manage the workflow lifecycle.
     ///
     /// - Parameters:
-    ///   - root: RootStep 프로토콜을 구현한 객체 (일반적으로 Core)
-    ///   - onProcedureFinish: 워크플로우 완료 시 호출되는 콜백
-    /// - Returns: 워크플로우 스트림을 취소할 수 있는 Cancellable
+    ///   - root: An object implementing the RootStep protocol (typically a Core).
+    ///   - onProcedureFinish: A callback invoked when the workflow completes.
+    /// - Returns: A Cancellable to cancel the workflow stream.
     @discardableResult
     public final func start(
         _ root: RootStep,
@@ -80,10 +80,10 @@ extension Procedure {
     }
 }
 
-/// 워크플로우의 개별 단계를 나타내는 클래스입니다.
+/// Represents an individual step in the workflow.
 ///
-/// `onStep`으로 다음 Step을 체이닝하거나, `finalStep`으로 워크플로우를 종료합니다.
-/// Combine의 `flatMap`을 사용하여 Step 간 데이터 전달을 구현합니다.
+/// Chain to the next step with `onStep`, or terminate the workflow with `finalStep`.
+/// Uses Combine's `flatMap` to pass data between steps.
 @MainActor
 public final class ProcedureStep<RootStep, CurrentStep, Value> {
     private let procedure: Procedure<RootStep>
@@ -97,10 +97,10 @@ public final class ProcedureStep<RootStep, CurrentStep, Value> {
         self.stream = stream
     }
 
-    /// 다음 Step을 정의합니다.
+    /// Defines the next step.
     ///
-    /// - Parameter onStep: 현재 Step과 전달받은 데이터를 사용하여 다음 Step Publisher를 반환하는 클로저
-    /// - Returns: 다음 Step을 체이닝할 수 있는 `ProcedureStep`
+    /// - Parameter onStep: A closure that uses the current Step and received data to return the next Step Publisher.
+    /// - Returns: A `ProcedureStep` that can chain to the next step.
     public func onStep<NextStep, NextValue>(
         _ onStep: @escaping (CurrentStep, Value) -> AnyPublisher<(NextStep, NextValue), Never>
     ) -> ProcedureStep<RootStep, NextStep, NextValue> {
@@ -116,11 +116,11 @@ public final class ProcedureStep<RootStep, CurrentStep, Value> {
         )
     }
 
-    /// 마지막 Step을 정의하고 워크플로우를 완료합니다.
+    /// Defines the final step and completes the workflow.
     ///
-    /// 이 메서드 호출 후에는 더 이상 Step을 체이닝할 수 없습니다.
+    /// No further steps can be chained after calling this method.
     ///
-    /// - Parameter onStep: 최종 동작을 수행하는 클로저
+    /// - Parameter onStep: A closure that performs the final action.
     public func finalStep(
         _ onStep: @escaping (CurrentStep, Value) -> Void
     ) {

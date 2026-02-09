@@ -8,7 +8,7 @@ final class LoginScreen: Screen<LoginCore> {
     /// 상태 관찰과 액션 바인딩을 설정합니다.
     override func bind() {
         // Input
-        forward(state: \.loginSectionState, to: loginSection)
+        forward(statePath: \.loginSectionState, to: loginSection)
         
         // Output
         forward(actions: [
