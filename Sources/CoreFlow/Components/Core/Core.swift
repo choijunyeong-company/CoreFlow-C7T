@@ -9,7 +9,7 @@ import Foundation
 ///
 /// - Note: Core is created and managed by Flow.
 @MainActor
-open class Core<Action, State: Equatable>: Reactable, Activatable {
+open class Core<Action: Sendable, State: Equatable>: Reactable, Activatable {
     private let initialState: State
     @Published public private(set) var currentState: State
 
@@ -177,7 +177,7 @@ extension Core {
 /// Used when asynchronous work is needed in `reduce(state:action:)`.
 /// - `.none`: No additional work.
 /// - `.run`: Executes async work and sends derived actions.
-public enum Effect<Action> {
+public enum Effect<Action>: Sendable {
     public typealias Send = @MainActor (Action) async -> Void
     public typealias RunTask = @MainActor @Sendable (Send) async -> Void
 
