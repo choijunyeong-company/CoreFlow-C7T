@@ -18,20 +18,18 @@ final class LoginSection: ComponentView {
 
     override func initialize() {
         setupUI()
-        forward(actions: [
-            map(loginButton.touchUpInside, to: .loginButtonTapped)
-        ])
     }
     
-    func listen<P>(to publisher: P) where P : Publisher, State == P.Output, P.Failure == Never {
-        publisher
+    func bind(reactor: any Reactable<Action, State>) {
+        // Input
+        reactor.state
             .map(\.loginButtonTitleText)
             .sink { [descriptionLabel] text in
                 descriptionLabel.text = text
             }
             .store(in: &store)
         
-        publisher
+        reactor.state
             .map(\.isLoading)
             .sink { [loginButton, loadingIndicator] isLoading in
                 loginButton.isUserInteractionEnabled = !isLoading
@@ -42,6 +40,11 @@ final class LoginSection: ComponentView {
                     loadingIndicator.stopAnimating()
                 }
             }
+            .store(in: &store)
+        
+        // Output
+        map(loginButton.touchUpInside, to: .loginButtonTapped)
+            .sink { reactor.send($0) }
             .store(in: &store)
     }
 }

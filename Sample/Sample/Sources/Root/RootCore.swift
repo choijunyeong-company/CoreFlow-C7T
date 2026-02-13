@@ -26,7 +26,7 @@ public enum RootAction {
     case viewDidLoad
 }
 
-public struct RootState {}
+public struct RootState: Equatable {}
 
 public final class RootCore: Core<RootAction, RootState> {
     weak var listener: RootListener?
