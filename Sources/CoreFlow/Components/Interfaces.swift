@@ -8,8 +8,8 @@ import UIKit
 /// through a Combine publisher, enabling unidirectional data flow.
 @MainActor
 public protocol Reactable<Action, State>: AnyObject {
-    associatedtype Action: Sendable
-    associatedtype State: Equatable & Sendable
+    associatedtype Action
+    associatedtype State: Equatable
 
     var state: AnyPublisher<State, Never> { get }
     func send(_ action: Action)
@@ -17,10 +17,10 @@ public protocol Reactable<Action, State>: AnyObject {
 
 extension Reactable {
     public func scope<SubState: Equatable, SubAction>(
-        state statPath: KeyPath<State, SubState>,
+        state statePath: KeyPath<State, SubState>,
         transform: @escaping (SubAction) -> Action
     ) -> any Reactable<SubAction, SubState> {
-        SubReactor<SubState, SubAction>(state: state.map(statPath)) { [weak self] subAction in
+        SubReactor<SubState, SubAction>(state: state.map(statePath)) { [weak self] subAction in
             self?.send(transform(subAction))
         }
     }
