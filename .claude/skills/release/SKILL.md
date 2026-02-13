@@ -1,3 +1,8 @@
+---
+name: release
+description: CoreFlow패키지를 깃허브에 배포할 때 사용합니다.
+---
+
 # Release
 
 release 브랜치에 main을 병합하고, 새 버전 태그를 생성하여 GitHub Release를 수행합니다.
