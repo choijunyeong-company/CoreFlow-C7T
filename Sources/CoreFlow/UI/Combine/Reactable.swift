@@ -17,18 +17,22 @@ public protocol Reactable<Action, State>: AnyObject {
 extension Reactable {
     public func scope<SubState: Equatable, SubAction>(
         state statePath: KeyPath<State, SubState>,
-        transform: @escaping (SubAction) -> Action
+        transform: ((SubAction) -> Action)? = nil
     ) -> any Reactable<SubAction, SubState> {
         SubReactor<SubState, SubAction>(state: state.map(statePath)) { [weak self] subAction in
+            guard let transform else { return }
+            
             self?.send(transform(subAction))
         }
     }
     
     public func scope<SubState: Equatable, SubAction>(
         state statePath: KeyPath<State, SubState?>,
-        transform: @escaping (SubAction) -> Action
+        transform: ((SubAction) -> Action)? = nil
     ) -> any Reactable<SubAction, SubState?> {
         OptionalStateSubReactor<SubState, SubAction>(state: state.map(statePath)) { [weak self] subAction in
+            guard let transform else { return }
+            
             self?.send(transform(subAction))
         }
     }
