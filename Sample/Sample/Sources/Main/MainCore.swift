@@ -6,7 +6,7 @@ enum MainAction {
     case viewDidLoad
 }
 
-struct MainState {
+struct MainState: Equatable {
     var userName: String = ""
     let user: User
 }

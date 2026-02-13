@@ -155,8 +155,4 @@ public extension Screen {
             .sink(receiveValue: sink)
             .store(in: &store)
     }
-    
-    func forward<Substate, Listener: StateListener<Substate>>(statePath keyPath: KeyPath<State, Substate>, to listener: Listener) {
-        listener.listen(to: reactor.state.map(keyPath))
-    }
 }

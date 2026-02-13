@@ -20,7 +20,7 @@ enum LoginAction {
 }
 
 /// Screen의 상태 또는 Core 내부 상태를 정의합니다.
-struct LoginState {
+struct LoginState: Equatable {
     var isLoading = false
     var loginSectionState = LoginSection.State()
 }

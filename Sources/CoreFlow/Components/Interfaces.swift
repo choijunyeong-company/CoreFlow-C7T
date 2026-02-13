@@ -1,20 +1,6 @@
 import Combine
 import UIKit
 
-/// A type that reacts to actions and emits state changes.
-///
-/// This protocol defines the reactive behavior of a Core component.
-/// It receives actions via `send(_:)` and publishes state changes
-/// through a Combine publisher, enabling unidirectional data flow.
-@MainActor
-public protocol Reactable: AnyObject {
-    associatedtype Action: Sendable
-    associatedtype State
-
-    var state: AnyPublisher<State, Never> { get }
-    func send(_ action: Action)
-}
-
 /// A coordinator that owns and manages both Core and Screen components.
 ///
 /// Flow acts as the composition root for a feature, responsible for:
