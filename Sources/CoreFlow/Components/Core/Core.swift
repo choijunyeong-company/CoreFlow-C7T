@@ -9,7 +9,7 @@ import Foundation
 ///
 /// - Note: Core is created and managed by Flow.
 @MainActor
-open class Core<Action: Sendable, State>: Reactable, Activatable {
+open class Core<Action: Sendable, State: Equatable & Sendable>: Reactable, Activatable {
     private let initialState: State
     @Published public private(set) var currentState: State
 

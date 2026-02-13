@@ -6,7 +6,7 @@ import UIKit
 /// Screen observes state from Core (Reactor) and converts UI events into actions.
 /// Configure state observation and action binding in the `bind()` method.
 @MainActor
-open class Screen<Reactor: Reactable>: UIViewController, Screenable, ActionSource {
+open class Screen<Reactor: Reactable>: UIViewController, Screenable, ReactorBindable {
     public weak var reactor: Reactor!
 
     public typealias Action = Reactor.Action
@@ -28,7 +28,7 @@ open class Screen<Reactor: Reactable>: UIViewController, Screenable, ActionSourc
     /// Called after Screen creation in Flow's `createScreen()`.
     /// Use `observeState`, `observeDistinctState`, and `bind(onEmit:send:)` to
     /// implement state change observation and UI event-action binding.
-    open func bind() {}
+    open func bind(reactor: any Reactable<Action, State>) {}
 }
 
 // MARK: Sending action to Reactor

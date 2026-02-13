@@ -7,12 +7,23 @@ import UIKit
 /// It receives actions via `send(_:)` and publishes state changes
 /// through a Combine publisher, enabling unidirectional data flow.
 @MainActor
-public protocol Reactable: AnyObject {
+public protocol Reactable<Action, State>: AnyObject {
     associatedtype Action: Sendable
-    associatedtype State
+    associatedtype State: Equatable & Sendable
 
     var state: AnyPublisher<State, Never> { get }
     func send(_ action: Action)
+}
+
+extension Reactable {
+    public func scope<SubState: Equatable, SubAction>(
+        state statPath: KeyPath<State, SubState>,
+        transform: @escaping (SubAction) -> Action
+    ) -> any Reactable<SubAction, SubState> {
+        SubReactor<SubState, SubAction>(state: state.map(statPath)) { [weak self] subAction in
+            self?.send(transform(subAction))
+        }
+    }
 }
 
 /// A coordinator that owns and manages both Core and Screen components.
