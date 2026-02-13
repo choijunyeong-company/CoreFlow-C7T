@@ -22,7 +22,7 @@ enum LoginAction {
 /// Screen의 상태 또는 Core 내부 상태를 정의합니다.
 struct LoginState: Equatable {
     var isLoading = false
-    var loginSectionState = LoginSection.State()
+    var loginSectionState: LoginSection.State?
 }
 
 final class LoginCore: Core<LoginAction, LoginState> {
@@ -35,14 +35,14 @@ final class LoginCore: Core<LoginAction, LoginState> {
     override func reduce(state: inout LoginState, action: LoginAction) -> Effect<LoginAction> {
         switch action {
         case .viewDidLoad:
-            state.loginSectionState.loginButtonTitleText = "로그인을 진행해주세요."
+            state.loginSectionState = .init(loginButtonTitleText: "로그인을 진행해주세요.")
             return .none
             
         case .loginSection(let loginAction):
             switch loginAction {
             case .loginButtonTapped:
                 state.isLoading = true
-                state.loginSectionState.isLoading = true
+                state.loginSectionState?.isLoading = true
                 return .run { [weak self] send in
                     guard let self else { return }
                     
@@ -53,7 +53,7 @@ final class LoginCore: Core<LoginAction, LoginState> {
             
         case ._loginFinished(let user):
             state.isLoading = false
-            state.loginSectionState.isLoading = false
+            state.loginSectionState?.isLoading = false
             listener?.loginFinished(user: user)
             return .none
         }

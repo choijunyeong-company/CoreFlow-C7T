@@ -38,10 +38,10 @@ extension Reactable {
     }
     
     public func compactScope<SubState: Equatable, SubAction>(
-        state statePath: KeyPath<State, SubState>,
+        state statePath: KeyPath<State, SubState?>,
         transform: ((SubAction) -> Action)? = nil
     ) -> any Reactable<SubAction, SubState> {
-        SubReactor<SubState, SubAction>(state: state.compactMap(\.self).map(statePath)) { [weak self] subAction in
+        SubReactor<SubState, SubAction>(state: state.map(statePath).compactMap(\.self)) { [weak self] subAction in
             guard let transform else { return }
             
             self?.send(transform(subAction))
