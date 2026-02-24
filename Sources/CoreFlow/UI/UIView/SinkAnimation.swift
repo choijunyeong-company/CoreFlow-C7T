@@ -2,10 +2,10 @@ import Combine
 import UIKit
 
 public struct SinkAnimation: Sendable {
-    let duration: TimeInterval
-    let delay: TimeInterval
-    let options: UIView.AnimationOptions
-    
+    public let duration: TimeInterval
+    public let delay: TimeInterval
+    public let options: UIView.AnimationOptions
+
     public init(
         duration: TimeInterval = 0.35,
         delay: TimeInterval = 0.0,
@@ -15,10 +15,15 @@ public struct SinkAnimation: Sendable {
         self.delay = delay
         self.options = options
     }
+
+    public static let `default` = SinkAnimation()
 }
 
 public extension Publisher where Failure == Never, Output: Sendable {
-    func sink(_ animation: SinkAnimation, receiveValue: @Sendable @escaping (Output) -> Void) -> AnyCancellable {
+    func sink(
+        withAnimation animation: SinkAnimation = .default,
+        receiveValue: @Sendable @escaping (Output) -> Void
+    ) -> AnyCancellable {
         sink { output in
             Task(priority: .userInitiated) { @MainActor in
                 UIView
