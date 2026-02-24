@@ -23,7 +23,7 @@ public extension Publisher where Failure == Never, Output: Sendable {
     func sink(
         withAnimation animation: SinkAnimation = .default,
         animationTask: @Sendable @escaping @MainActor (Output) -> Void,
-        otherTask: ((Output) -> Void)? = nil
+        otherTask: (@Sendable @MainActor (Output) -> Void)? = nil
     ) -> AnyCancellable {
         sink { output in
             Task(priority: .userInitiated) { @MainActor in
@@ -33,8 +33,8 @@ public extension Publisher where Failure == Never, Output: Sendable {
                         delay: animation.delay,
                         options: animation.options
                     ) { animationTask(output) }
+                otherTask?(output)
             }
-            otherTask?(output)
         }
     }
 }
