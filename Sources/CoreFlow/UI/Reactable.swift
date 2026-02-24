@@ -43,8 +43,16 @@ extension Reactable {
     ) -> any Reactable<SubAction, SubState> {
         SubReactor<SubState, SubAction>(state: state.map(statePath).compactMap(\.self)) { [weak self] subAction in
             guard let transform else { return }
-            
+
             self?.send(transform(subAction))
+        }
+    }
+
+    public func compact<Wrapped: Equatable>() -> any Reactable<Action, Wrapped> where State == Wrapped? {
+        SubReactor<Wrapped, Action>(
+            state: state.compactMap { $0 }.eraseToAnyPublisher()
+        ) { [weak self] action in
+            self?.send(action)
         }
     }
 }

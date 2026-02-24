@@ -6,10 +6,7 @@ public protocol ReactorBindable: ActionSource {
 }
 
 public extension ReactorBindable {
-    func bind(reactor: any Reactable<Action, State>) {
-        assertionFailure("not implemented.")
-    }
     func bind(reactor: any Reactable<Action, State?>) {
-        assertionFailure("not implemented.")
+        bind(reactor: reactor.compact())
     }
 }
