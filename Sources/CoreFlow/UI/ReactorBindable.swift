@@ -1,3 +1,4 @@
+@MainActor
 public protocol ReactorBindable: ActionSource {
     associatedtype State: Equatable
     
