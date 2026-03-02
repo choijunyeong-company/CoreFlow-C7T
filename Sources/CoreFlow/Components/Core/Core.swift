@@ -11,11 +11,14 @@ import Foundation
 @MainActor
 open class Core<Action: Sendable, State: Equatable>: Reactable, Activatable {
     private let initialState: State
-    @Published public private(set) var currentState: State
-
+    
+    public private(set) var currentState: State {
+        didSet { _state.send(currentState) }
+    }
+    private let _state: CurrentValueSubject<State, Never>
     public var state: AnyPublisher<State, Never> {
         ensureStream()
-        return $currentState.eraseToAnyPublisher()
+        return _state.eraseToAnyPublisher()
     }
 
     private var actionStream: AsyncStream<Action>?
@@ -31,6 +34,7 @@ open class Core<Action: Sendable, State: Equatable>: Reactable, Activatable {
 
     public init(initialState: State) {
         self.initialState = initialState
+        self._state = CurrentValueSubject(initialState)
         currentState = initialState
     }
 
