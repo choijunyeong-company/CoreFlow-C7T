@@ -17,6 +17,8 @@ enum LoginAction {
     
     /// 내부 파생 액션: 로그인 완료 후 호출
     case _loginFinished(User)
+    
+    case proxyTest(User)
 }
 
 /// Screen의 상태 또는 Core 내부 상태를 정의합니다.
@@ -47,7 +49,7 @@ final class LoginCore: Core<LoginAction, LoginState> {
                     guard let self else { return }
                     
                     let user = await service.login()
-                    await send(._loginFinished(user))
+                    await send(.proxyTest(user))
                 }
             }
             
@@ -56,6 +58,9 @@ final class LoginCore: Core<LoginAction, LoginState> {
             state.loginSectionState?.isLoading = false
             listener?.loginFinished(user: user)
             return .none
+            
+        case .proxyTest(let user):
+            return .send(._loginFinished(user))
         }
     }
 }

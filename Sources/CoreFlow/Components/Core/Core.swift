@@ -93,9 +93,10 @@ extension Core {
     }
 
     private func handle(_ effect: Effect<Action>) {
+        let description = effect.description
         switch effect {
         case .none:
-            decrementInFlight(effect)
+            decrementInFlight(description)
 
         case let .run(priority, task):
             Task.detached(priority: priority) {
@@ -107,9 +108,13 @@ extension Core {
                 await MainActor.run { [weak self] in
                     guard let self else { return }
 
-                    decrementInFlight(effect)
+                    decrementInFlight(description)
                 }
             }
+            
+        case .send(let action):
+            send(action)
+            decrementInFlight(description)
         }
     }
 }
@@ -160,11 +165,11 @@ extension Core {
         print("[Core] Action.\(action) is in flight")
     }
 
-    private func decrementInFlight(_ effect: Effect<Action>) {
+    private func decrementInFlight(_ effectMessage: String) {
         guard isTestMode else { return }
 
         inFlightCount -= 1
-        print("[Core] Effect.\(effect) is done")
+        print("[Core] Effect.\(effectMessage) is done")
 
         if inFlightCount == 0 {
             waitExhaustionTimers.values.forEach { $0.invalidate() }
@@ -181,7 +186,7 @@ extension Core {
 /// Used when asynchronous work is needed in `reduce(state:action:)`.
 /// - `.none`: No additional work.
 /// - `.run`: Executes async work and sends derived actions.
-public enum Effect<Action>: Sendable {
+public enum Effect<Action>: CustomStringConvertible {
     public typealias Send = @MainActor (Action) async -> Void
     public typealias RunTask = @MainActor @Sendable (Send) async -> Void
 
@@ -190,6 +195,17 @@ public enum Effect<Action>: Sendable {
 
     /// Executes async work and sends derived actions upon completion.
     case run(priority: TaskPriority? = nil, task: RunTask)
+    
+    /// Send new action.
+    case send(_ action: Action)
+    
+    public var description: String {
+        switch self {
+        case .none: "none"
+        case .run(_, _): "run"
+        case .send(let action): "send \(action)"
+        }
+    }
 }
 
 struct TestError: LocalizedError {
