@@ -7,7 +7,7 @@ import UIKit
 /// Configure state observation and action binding in the `bind()` method.
 @MainActor
 open class Screen<Reactor: Reactable>: UIViewController, Screenable, ActionSource {
-    public weak var reactor: Reactor!
+    public let reactor: Reactor
 
     public typealias Action = Reactor.Action
     public typealias State = Reactor.State
