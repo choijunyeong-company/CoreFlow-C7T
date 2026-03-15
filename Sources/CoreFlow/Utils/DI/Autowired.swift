@@ -11,13 +11,9 @@
 /// }
 /// ```
 @propertyWrapper
-public class Autowired<T> {
-    public let wrappedValue: T
-
-    /// Resolves the dependency from ServiceLocator at initialization.
-    public init() {
-        self.wrappedValue = ServiceLocator.shared.resolve()
-    }
+public struct Autowired<T> {
+    public lazy var wrappedValue: T = ServiceLocator.shared.resolve()
+    public init() { }
 }
 
 /// A singleton class that manages the dependency container.

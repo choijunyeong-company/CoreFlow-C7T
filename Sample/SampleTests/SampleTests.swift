@@ -4,25 +4,19 @@ import CoreFlow
 
 @MainActor
 struct SampleTests {
-    init() {
-        ServiceLocator.shared.register(
-            LoginService.self,
-            object: { _ in
-                StubLoginService()
-            }
-        ).inObjectScope(.transient)
-    }
-
     @Test func example() async throws {
         // Given
         let sut = LoginCore(initialState: .init(isLoading: true))
+        let testUser = User(name: "Test user")
+        sut.service = StubLoginService(user: testUser)
         sut.enableTestMode()
         
         // When
-        sut.send(.loginButtonTapped)
+        sut.send(.loginSection(.loginButtonTapped))
         try await sut.exhaust()
         
         // Then
         #expect(sut.currentState.isLoading == false)
+        #expect(sut.currentState.logginUser == testUser)
     }
 }

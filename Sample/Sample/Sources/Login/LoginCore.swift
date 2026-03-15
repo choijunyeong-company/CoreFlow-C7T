@@ -17,19 +17,18 @@ enum LoginAction {
     
     /// 내부 파생 액션: 로그인 완료 후 호출
     case _loginFinished(User)
-    
-    case proxyTest(User)
 }
 
 /// Screen의 상태 또는 Core 내부 상태를 정의합니다.
 struct LoginState: Equatable {
     var isLoading = false
+    var logginUser: User?
     var loginSectionState: LoginSection.State?
 }
 
 final class LoginCore: Core<LoginAction, LoginState> {
     /// 의존성 주입: ServiceLocator로부터 자동 해결
-    @Autowired private var service: LoginService
+    @Autowired var service: LoginService
 
     weak var listener: LoginListener?
     weak var router: LoginRouting?
@@ -49,18 +48,16 @@ final class LoginCore: Core<LoginAction, LoginState> {
                     guard let self else { return }
                     
                     let user = await service.login()
-                    await send(.proxyTest(user))
+                    await send(._loginFinished(user))
                 }
             }
             
         case ._loginFinished(let user):
+            state.logginUser = user
             state.isLoading = false
             state.loginSectionState?.isLoading = false
             listener?.loginFinished(user: user)
             return .none
-            
-        case .proxyTest(let user):
-            return .send(._loginFinished(user))
         }
     }
 }
