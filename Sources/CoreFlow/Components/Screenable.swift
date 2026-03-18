@@ -8,6 +8,7 @@
 import Combine
 import UIKit
 
+@MainActor
 public protocol Screenable: ActionSource, ViewControllable where Action == Reactor.Action {
     associatedtype Reactor: Reactable
     typealias State = Reactor.State
