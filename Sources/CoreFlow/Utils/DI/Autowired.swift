@@ -23,7 +23,7 @@ public struct Autowired<T> {
 public final class ServiceLocator: Sendable {
     public static let shared = ServiceLocator()
 
-    private let container: Container
+    nonisolated(unsafe) private let container: Container
 
     private init(container: Container = Container()) {
         self.container = container
