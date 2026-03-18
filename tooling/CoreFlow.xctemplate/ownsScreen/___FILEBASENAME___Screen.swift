@@ -3,8 +3,16 @@
 import CoreFlow
 import UIKit
 
-public final class ___VARIABLE_productName___Screen: Screen<___VARIABLE_productName___Core> {
-    public override func bind() {
+public final class ___VARIABLE_productName___Screen: UIViewController, Screenable {
+    public let reactor: ___VARIABLE_productName___Core
+
+    init(reactor: ___VARIABLE_productName___Core) {
+        self.reactor = reactor
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) { nil }
+    
+    public func bind() {
         // Bindings between UI and Reactor go here.
     }
 }
@@ -12,7 +20,7 @@ public final class ___VARIABLE_productName___Screen: Screen<___VARIABLE_productN
 extension ___VARIABLE_productName___Screen {
     public override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()   
+        setupUI()
         reactor.send(.viewDidLoad)
     }
 }
