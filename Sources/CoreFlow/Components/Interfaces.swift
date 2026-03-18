@@ -13,17 +13,13 @@ import UIKit
 @MainActor
 public protocol Flowable: AnyObject {
     associatedtype Core
-    associatedtype Screen: UIViewController
+    associatedtype Screen: ViewControllable
 
     var core: Core { get }
     var screen: Screen { get }
 }
 
-/// A view controller that serves as the visual representation of a feature.
-///
-/// Screens are responsible for rendering UI and forwarding user interactions
-/// to their associated Core via actions.
-public protocol Screenable: UIViewController {}
+public protocol ViewControllable: UIViewController {}
 
 /// A type that supports RIBs-style activation lifecycle.
 ///

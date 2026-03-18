@@ -41,3 +41,5 @@ open class ScreenLessFlow<Core: Activatable>: Flowable {
         preconditionFailure("you must override this method")
     }
 }
+
+extension UIViewController: ViewControllable {}
