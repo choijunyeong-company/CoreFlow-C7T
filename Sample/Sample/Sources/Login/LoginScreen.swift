@@ -2,11 +2,18 @@ import Combine
 import CoreFlow
 import UIKit
 
-final class LoginScreen: Screen<LoginCore> {
+final class LoginScreen: UIViewController, Screenable {
+    let reactor: LoginCore
+
+    init(reactor: LoginCore) {
+        self.reactor = reactor
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) { nil }
     private let loginSection = LoginSection()
 
     /// 상태 관찰과 액션 바인딩을 설정합니다.
-    override func bind() {
+    func bind() {
         // Input
         reactor.state
             .weakRef(reactor)

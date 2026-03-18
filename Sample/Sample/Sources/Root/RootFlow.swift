@@ -21,7 +21,6 @@ public final class RootFlow: Flow<RootCore, RootScreen> {
 
     public override func createScreen() -> RootScreen {
         let screen = RootScreen(reactor: core)
-        screen.bind()
         return screen
     }
 }

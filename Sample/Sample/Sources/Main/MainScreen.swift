@@ -2,11 +2,19 @@ import CoreFlow
 import Combine
 import UIKit
 
-final class MainScreen: Screen<MainCore> {
+final class MainScreen: UIViewController, Screenable {
     private let titleLabel = UILabel()
     
-    override func bind() {
-        observeState(\.userName) { [weak self] output in
+    let reactor: MainCore
+    
+    init(reactor: MainCore) {
+        self.reactor = reactor
+        super.init(nibName: nil, bundle: nil)
+    }
+    required init?(coder: NSCoder) { nil }
+    
+    func bind() {
+        observeDistinctState(\.userName) { [weak self] output in
             self?.titleLabel.text = "안녕하세요, \(output)"
         }
     }
