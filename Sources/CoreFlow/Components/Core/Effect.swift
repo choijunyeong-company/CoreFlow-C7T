@@ -1,3 +1,11 @@
+//
+//  Effect.swift
+//  CoreFlow
+//
+//  Created by choijunios on 3/20/26.
+//
+
+
 /// A side effect returned from action processing.
 ///
 /// Used when asynchronous work is needed in `reduce(state:action:)`.

@@ -9,7 +9,7 @@ import Foundation
 ///
 /// - Note: Core is created and managed by Flow.
 @MainActor
-open class Core<Action: Sendable, State: Equatable>: Reactable, Activatable {
+open class Core<Action: Sendable, State: Equatable & Sendable>: Reactable, Activatable {
     private let initialState: State
     
     public private(set) var currentState: State {
@@ -73,6 +73,8 @@ open class Core<Action: Sendable, State: Equatable>: Reactable, Activatable {
         actionContinuation?.yield(action)
     }
 }
+
+// MARK: State stream
 
 extension Core {
     private func ensureStream() {
@@ -148,7 +150,7 @@ extension Core {
                 Task(priority: .background) { @MainActor [weak self] in
                     guard let self else { return }
 
-                    exhaustionContinuations[waitId]?.resume(throwing: TestError.timeout)
+                    exhaustionContinuations[waitId]?.resume(throwing: CoreTestError.timeout)
                     exhaustionContinuations.removeValue(forKey: waitId)
                 }
             })
@@ -181,35 +183,8 @@ extension Core {
     }
 }
 
-/// A side effect returned from action processing.
-///
-/// Used when asynchronous work is needed in `reduce(state:action:)`.
-/// - `.none`: No additional work.
-/// - `.run`: Executes async work and sends derived actions.
-public enum Effect<Action>: CustomStringConvertible {
-    public typealias Send = @MainActor (Action) async -> Void
-    public typealias RunTask = @MainActor @Sendable (Send) async -> Void
-
-    /// No additional work needed.
-    case none
-
-    /// Executes async work and sends derived actions upon completion.
-    case run(priority: TaskPriority? = nil, task: RunTask)
-    
-    /// Send new action.
-    case send(_ action: Action)
-    
-    public var description: String {
-        switch self {
-        case .none: "none"
-        case .run(_, _): "run"
-        case .send(let action): "send \(action)"
-        }
-    }
-}
-
-struct TestError: LocalizedError {
+struct CoreTestError: LocalizedError {
     let errorDescroption: String
 
-    static let timeout: TestError = .init(errorDescroption: "[Core] waitForIdle timed out")
+    static let timeout: CoreTestError = .init(errorDescroption: "[Core] waitForIdle timed out")
 }
