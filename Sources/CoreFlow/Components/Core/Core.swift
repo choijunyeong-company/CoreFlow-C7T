@@ -185,7 +185,7 @@ extension Core {
 }
 
 struct CoreTestError: LocalizedError {
-    let errorDescroption: String
+    let errorDescription: String
 
-    static let timeout: CoreTestError = .init(errorDescroption: "[Core] waitForIdle timed out")
+    static let timeout: CoreTestError = .init(errorDescription: "[Core] waitForIdle timed out")
 }

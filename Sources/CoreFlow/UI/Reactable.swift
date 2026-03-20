@@ -19,8 +19,7 @@ public protocol Reactable<Action, State>: AnyObject {
 extension Reactable {
     public func scope<SubAction, SubState: Equatable>(
         state statePath: KeyPath<State, SubState>,
-        transform: ((SubAction) -> Action)? = nil,
-        
+        transform: ((SubAction) -> Action)? = nil
     ) -> any Reactable<SubAction, SubState> {
         SubReactor<SubAction, SubState>(state: state.map(statePath)) { [weak self] subAction in
             guard let transform else { return }
@@ -33,7 +32,7 @@ extension Reactable {
         }
     }
     
-    public func scope<SubState: Equatable, SubAction>(
+    public func scope<SubAction, SubState: Equatable>(
         state statePath: KeyPath<State, SubState?>,
         transform: ((SubAction) -> Action)? = nil
     ) -> any Reactable<SubAction, SubState?> {
