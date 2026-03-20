@@ -9,7 +9,7 @@ release 브랜치에 main을 병합하고, 새 버전 태그를 생성하여 Git
 
 ## 절차
 
-1. `Sample/Sample.xcodeproj`프로젝트와 `Package.swift`프로젝트를 빌드 및 테스트 코드를 실행합니다. 실패시 프로세스를 종료합니다.
+0. Sample 프로젝트를 빌드 및 테스트 코드를 실행합니다. 실패시 프로세스를 종료합니다. []
 1. `git checkout release`로 release 브랜치로 전환합니다.
 2. `git merge main`으로 main 브랜치를 병합합니다.
 3. `git tag --sort=-v:refname | head -1`로 최신 태그를 조회합니다.
@@ -18,6 +18,19 @@ release 브랜치에 main을 병합하고, 새 버전 태그를 생성하여 Git
 6. `git push main release --tags`로 release 브랜치와 태그를 push합니다.
 7. 이전 태그와 새 태그 사이의 커밋 로그를 `git log <이전태그>..<새태그> --oneline`으로 조회합니다.
 8. 커밋 로그를 기반으로 변경사항을 정리하여 `gh release create`로 GitHub Release를 생성합니다.
+
+## 빌드 및 테스트 가이드
+
+아래 명령을 실행합니다.
+```
+xcodebuild \
+-project Sample/Sample.xcodeproj \
+-scheme Sample \
+-destination 'platform=iOS Simulator,name=iPhone 17 Pro' \
+-sdk iphonesimulator \
+-configuration Debug \
+test
+```
 
 ## Release Notes 작성 형식
 
