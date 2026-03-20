@@ -2,7 +2,7 @@ import Combine
 import CoreFlow
 import UIKit
 
-final class LoginScreen: UIViewController, Screenable {
+final class LoginScreen: UIViewController, @MainActor Screenable {
     let reactor: LoginCore
 
     init(reactor: LoginCore) {

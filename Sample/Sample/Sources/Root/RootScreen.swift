@@ -1,7 +1,7 @@
 import CoreFlow
 import UIKit
 
-public final class RootScreen: UIViewController, Screenable {
+public final class RootScreen: UIViewController, @MainActor Screenable {
     public let reactor: RootCore
 
     init(reactor: RootCore) {

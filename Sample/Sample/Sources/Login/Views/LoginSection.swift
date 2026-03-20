@@ -2,7 +2,7 @@ import CoreFlow
 import Combine
 import UIKit
 
-final class LoginSection: ScopedView {
+final class LoginSection: @MainActor ScopedView {
     enum Action {
         case loginButtonTapped
     }

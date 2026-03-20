@@ -2,7 +2,7 @@ import CoreFlow
 import Combine
 import UIKit
 
-final class MainScreen: UIViewController, Screenable {
+final class MainScreen: UIViewController, @MainActor Screenable {
     private let titleLabel = UILabel()
     
     let reactor: MainCore
