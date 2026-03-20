@@ -9,6 +9,7 @@ release 브랜치에 main을 병합하고, 새 버전 태그를 생성하여 Git
 
 ## 절차
 
+1. `Sample/Sample.xcodeproj`프로젝트와 `Package.swift`프로젝트를 빌드 및 테스트 코드를 실행합니다. 실패시 프로세스를 종료합니다.
 1. `git checkout release`로 release 브랜치로 전환합니다.
 2. `git merge main`으로 main 브랜치를 병합합니다.
 3. `git tag --sort=-v:refname | head -1`로 최신 태그를 조회합니다.
