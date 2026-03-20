@@ -1,6 +1,6 @@
 import Combine
 
-final class SubReactor<State: Equatable, Action>: Reactable {
+final class SubReactor<Action, State>: Reactable {
     let state: AnyPublisher<State, Never>
     private let onAction: (Action) -> Void
     
@@ -11,7 +11,7 @@ final class SubReactor<State: Equatable, Action>: Reactable {
     func send(_ action: Action) { onAction(action) }
 }
 
-final class OptionalStateSubReactor<State: Equatable, Action>: Reactable {
+final class OptionalStateSubReactor<Action, State>: Reactable {
     let state: AnyPublisher<State?, Never>
     private let onAction: (Action) -> Void
     

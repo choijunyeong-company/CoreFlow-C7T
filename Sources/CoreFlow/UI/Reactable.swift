@@ -7,49 +7,49 @@ import Combine
 /// through a Combine publisher, enabling unidirectional data flow.
 @MainActor
 public protocol Reactable<Action, State>: AnyObject {
-    associatedtype Action: Sendable
-    associatedtype State: Equatable
+    associatedtype Action
+    associatedtype State
 
     var state: AnyPublisher<State, Never> { get }
     func send(_ action: Action)
 }
 
 extension Reactable {
-    public func scope<SubState: Equatable, SubAction>(
+    public func scope<SubState, SubAction>(
         state statePath: KeyPath<State, SubState>,
         transform: ((SubAction) -> Action)? = nil
     ) -> any Reactable<SubAction, SubState> {
-        SubReactor<SubState, SubAction>(state: state.map(statePath)) { [weak self] subAction in
+        SubReactor<SubAction, SubState>(state: state.map(statePath)) { [weak self] subAction in
             guard let transform else { return }
             
             self?.send(transform(subAction))
         }
     }
     
-    public func scope<SubState: Equatable, SubAction>(
+    public func scope<SubState, SubAction>(
         state statePath: KeyPath<State, SubState?>,
         transform: ((SubAction) -> Action)? = nil
     ) -> any Reactable<SubAction, SubState?> {
-        OptionalStateSubReactor<SubState, SubAction>(state: state.map(statePath)) { [weak self] subAction in
+        OptionalStateSubReactor<SubAction, SubState>(state: state.map(statePath)) { [weak self] subAction in
             guard let transform else { return }
             
             self?.send(transform(subAction))
         }
     }
     
-    public func compactScope<SubState: Equatable, SubAction>(
+    public func compactScope<SubState, SubAction>(
         state statePath: KeyPath<State, SubState?>,
         transform: ((SubAction) -> Action)? = nil
     ) -> any Reactable<SubAction, SubState> {
-        SubReactor<SubState, SubAction>(state: state.map(statePath).compactMap(\.self)) { [weak self] subAction in
+        SubReactor<SubAction, SubState>(state: state.map(statePath).compactMap(\.self)) { [weak self] subAction in
             guard let transform else { return }
 
             self?.send(transform(subAction))
         }
     }
 
-    public func compact<Wrapped: Equatable>() -> any Reactable<Action, Wrapped> where State == Wrapped? {
-        SubReactor<Wrapped, Action>(
+    public func compact<Wrapped>() -> any Reactable<Action, Wrapped> where State == Wrapped? {
+        SubReactor<Action, Wrapped>(
             state: state.compactMap { $0 }.eraseToAnyPublisher()
         ) { [weak self] action in
             self?.send(action)
