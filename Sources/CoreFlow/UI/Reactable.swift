@@ -8,25 +8,32 @@ import Combine
 @MainActor
 public protocol Reactable<Action, State>: AnyObject {
     associatedtype Action
-    associatedtype State
+    associatedtype State: Equatable
 
     var state: AnyPublisher<State, Never> { get }
+    var currentState: State { get }
+    
     func send(_ action: Action)
 }
 
 extension Reactable {
-    public func scope<SubState, SubAction>(
+    public func scope<SubAction, SubState: Equatable>(
         state statePath: KeyPath<State, SubState>,
-        transform: ((SubAction) -> Action)? = nil
+        transform: ((SubAction) -> Action)? = nil,
+        
     ) -> any Reactable<SubAction, SubState> {
         SubReactor<SubAction, SubState>(state: state.map(statePath)) { [weak self] subAction in
             guard let transform else { return }
             
             self?.send(transform(subAction))
+        } onCurrentState: { [weak self, initialState = currentState[keyPath: statePath]] in
+            guard let self else { return initialState }
+            
+            return currentState[keyPath: statePath]
         }
     }
     
-    public func scope<SubState, SubAction>(
+    public func scope<SubState: Equatable, SubAction>(
         state statePath: KeyPath<State, SubState?>,
         transform: ((SubAction) -> Action)? = nil
     ) -> any Reactable<SubAction, SubState?> {
@@ -34,25 +41,49 @@ extension Reactable {
             guard let transform else { return }
             
             self?.send(transform(subAction))
+        } onCurrentState: { [weak self, initialState = currentState[keyPath: statePath]] in
+            guard let self else { return initialState }
+            
+            return currentState[keyPath: statePath]
         }
+    }
+}
+
+// MARK: Type erase
+extension Reactable {
+    public func eraseToAnyReactor() -> AnyReactor<Action, State> {
+        AnyReactor(origin: self)
+    }
+}
+
+public final class AnyReactor<Action, State: Equatable>: Reactable {
+    private let origin: Reactable<Action, State>
+    public let state: AnyPublisher<State, Never>
+    public var currentState: State { origin.currentState }
+    
+    init(origin: Reactable<Action, State>) {
+        self.origin = origin
+        self.state = origin.state
     }
     
-    public func compactScope<SubState, SubAction>(
-        state statePath: KeyPath<State, SubState?>,
-        transform: ((SubAction) -> Action)? = nil
-    ) -> any Reactable<SubAction, SubState> {
-        SubReactor<SubAction, SubState>(state: state.map(statePath).compactMap(\.self)) { [weak self] subAction in
-            guard let transform else { return }
-
-            self?.send(transform(subAction))
-        }
+    public func send(_ action: Action) {
+        origin.send(action)
     }
+}
 
-    public func compact<Wrapped>() -> any Reactable<Action, Wrapped> where State == Wrapped? {
-        SubReactor<Action, Wrapped>(
-            state: state.compactMap { $0 }.eraseToAnyPublisher()
-        ) { [weak self] action in
-            self?.send(action)
-        }
+// MARK: Preview
+
+public final class PreviewReactor<Action, State: Equatable>: Reactable {
+    private let initialState: State
+    public let currentState: State
+    public let state: AnyPublisher<State, Never>
+    
+    public init(initialState state: State) {
+        self.initialState = state
+        self.currentState = state
+        self.state = CurrentValueSubject<State, Never>(state)
+            .eraseToAnyPublisher()
     }
+    
+    public func send(_ action: Action) { print(action) }
 }

@@ -3,12 +3,15 @@ import Combine
 import UIKit
 
 final class MainScreen: UIViewController, @MainActor Screenable {
+    typealias Action = MainAction
+    typealias State = MainState
+    
     private let titleLabel = UILabel()
     
-    let reactor: MainCore
+    let reactor: AnyReactor<Action, State>
     
-    init(reactor: MainCore) {
-        self.reactor = reactor
+    init(reactor: any Reactable<Action, State>) {
+        self.reactor = reactor.eraseToAnyReactor()
         super.init(nibName: nil, bundle: nil)
     }
     required init?(coder: NSCoder) { nil }

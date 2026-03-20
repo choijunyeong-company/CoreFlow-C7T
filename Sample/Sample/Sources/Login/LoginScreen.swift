@@ -3,10 +3,13 @@ import CoreFlow
 import UIKit
 
 final class LoginScreen: UIViewController, @MainActor Screenable {
-    let reactor: LoginCore
+    typealias Action = LoginAction
+    typealias State = LoginState
+    
+    let reactor: AnyReactor<LoginAction, LoginState>
 
-    init(reactor: LoginCore) {
-        self.reactor = reactor
+    init(reactor: any Reactable<Action, State>) {
+        self.reactor = reactor.eraseToAnyReactor()
         super.init(nibName: nil, bundle: nil)
     }
     required init?(coder: NSCoder) { nil }
@@ -23,7 +26,7 @@ final class LoginScreen: UIViewController, @MainActor Screenable {
             .store(in: &store)
         
         loginSection.bind(
-            reactor: reactor.compactScope(
+            reactor: reactor.scope(
                 state: \.loginSectionState,
                 transform: { .loginSection($0) }
             )
@@ -62,4 +65,10 @@ extension LoginScreen {
             loginSection.trailingAnchor.constraint(lessThanOrEqualTo: view.trailingAnchor, constant: -20),
         ])
     }
+}
+
+#Preview {
+    LoginScreen(
+        reactor: PreviewReactor(initialState: .init())
+    )
 }

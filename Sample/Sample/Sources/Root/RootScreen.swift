@@ -2,10 +2,10 @@ import CoreFlow
 import UIKit
 
 public final class RootScreen: UIViewController, @MainActor Screenable {
-    public let reactor: RootCore
+    public let reactor: AnyReactor<Action, State>
 
-    init(reactor: RootCore) {
-        self.reactor = reactor
+    init(reactor: any Reactable<Action, State>) {
+        self.reactor = reactor.eraseToAnyReactor()
         super.init(nibName: nil, bundle: nil)
     }
     required init?(coder: NSCoder) { nil }
@@ -24,4 +24,9 @@ extension RootScreen {
         view.backgroundColor = .systemBackground
         navigationController?.isNavigationBarHidden = true
     }
+}
+
+extension RootScreen {
+    public typealias State = RootState
+    public typealias Action = RootAction
 }

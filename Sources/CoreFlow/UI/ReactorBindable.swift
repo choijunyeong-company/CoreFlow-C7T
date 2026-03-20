@@ -6,8 +6,7 @@ public protocol ReactorBindable: ActionSource {
     func bind(reactor: any Reactable<Action, State?>)
 }
 
-public extension ReactorBindable {
-    func bind(reactor: any Reactable<Action, State?>) {
-        bind(reactor: reactor.compact())
-    }
+extension ReactorBindable {
+    public func bind(reactor: any Reactable<Action, State>) {}
+    public func bind(reactor: any Reactable<Action, State?>) {}
 }

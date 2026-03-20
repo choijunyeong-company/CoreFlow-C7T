@@ -20,9 +20,10 @@ final class LoginSection: @MainActor ScopedView {
         setupUI()
     }
     
-    func bind(reactor: any Reactable<Action, State>) {
+    func bind(reactor: any Reactable<Action, State?>) {
         // Input
         reactor.state
+            .compactMap(\.self)
             .map(\.loginButtonTitleText)
             .sink { [descriptionLabel] text in
                 descriptionLabel.text = text
@@ -30,6 +31,7 @@ final class LoginSection: @MainActor ScopedView {
             .store(in: &store)
         
         reactor.state
+            .compactMap(\.self)
             .map(\.isLoading)
             .sink { [loginButton, loadingIndicator] isLoading in
                 loginButton.isUserInteractionEnabled = !isLoading

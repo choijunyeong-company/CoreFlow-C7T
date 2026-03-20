@@ -10,9 +10,8 @@ import UIKit
 
 @MainActor
 public protocol Screenable: ActionSource, ViewControllable {
-    associatedtype Reactor: Reactable where Action == Reactor.Action
-    typealias State = Reactor.State
-    var reactor: Reactor { get }
+    associatedtype State: Equatable
+    var reactor: AnyReactor<Action, State> { get }
 }
 
 extension Screenable {
