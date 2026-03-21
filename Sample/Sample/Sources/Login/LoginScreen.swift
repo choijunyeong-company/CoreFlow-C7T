@@ -6,7 +6,7 @@ final class LoginScreen: UIViewController, @MainActor Screenable {
     typealias Action = LoginAction
     typealias State = LoginState
     
-    let reactor: AnyReactor<LoginAction, LoginState>
+    let reactor: AnyReactor<Action, State>
 
     init(reactor: any Reactable<Action, State>) {
         self.reactor = reactor.eraseToAnyReactor()
