@@ -17,7 +17,7 @@ final class MainScreen: UIViewController, @MainActor Screenable {
     required init?(coder: NSCoder) { nil }
     
     func bind() {
-        observeDistinctState(\.userName) { [weak self] output in
+        observeState(\.userName) { [weak self] output in
             self?.titleLabel.text = "안녕하세요, \(output)"
         }
     }
