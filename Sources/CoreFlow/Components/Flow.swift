@@ -30,15 +30,7 @@ open class Flow<Core: Reactable & Activatable, Screen: Screenable>: Flowable {
 
     @MainActor
     deinit {
-        core.willResignActive()
-
-        #if DEBUG
-            let _objectId = objectId
-            for component in FlowComponent.allCases {
-                let key = ComponentKey(objectId: _objectId, component: component)
-                LeakDetector.shared.checkMemoryLeak(key: key)
-            }
-        #endif
+        cleanup()
     }
 
     /// Creates a Core instance.
@@ -58,8 +50,23 @@ open class Flow<Core: Reactable & Activatable, Screen: Screenable>: Flowable {
     }
 }
 
+extension Flow {
+    @_optimize(none)
+    private func cleanup() {
+        core.willResignActive()
+
+        #if DEBUG
+            let _objectId = objectId
+            for component in FlowComponent.allCases {
+                let key = ComponentKey(objectId: _objectId, component: component)
+                LeakDetector.shared.checkMemoryLeak(key: key)
+            }
+        #endif
+    }
+}
+
 #if DEBUG
-    private extension Flow {
+    extension Flow {
         private nonisolated var objectId: ObjectIdentifier { ObjectIdentifier(self) }
         private func detactLeak(object: any AnyObject, component: FlowComponent) {
             let key = ComponentKey(objectId: objectId, component: component)
