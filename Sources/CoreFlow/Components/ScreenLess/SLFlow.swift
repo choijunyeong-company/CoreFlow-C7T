@@ -20,6 +20,7 @@ open class ScreenLessFlow<Core: Activatable>: Flowable {
 
     public init() {}
 
+    @_optimize(none)
     @MainActor
     deinit {
         core.willResignActive()
