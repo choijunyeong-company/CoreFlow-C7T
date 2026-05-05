@@ -28,6 +28,7 @@ open class Flow<Core: Reactable & Activatable, Screen: Screenable>: Flowable {
 
     public init() {}
 
+    @_optimize(none)
     @MainActor
     deinit {
         cleanup()
@@ -51,7 +52,6 @@ open class Flow<Core: Reactable & Activatable, Screen: Screenable>: Flowable {
 }
 
 extension Flow {
-    @_optimize(none)
     private func cleanup() {
         core.willResignActive()
 
